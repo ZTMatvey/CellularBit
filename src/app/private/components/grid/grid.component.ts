@@ -1,5 +1,5 @@
 import { Point } from './../../../core/shared/services/point';
-import { EventEmitter, Component, ElementRef, Output, ViewChild, AfterViewInit, HostListener } from '@angular/core';
+import { EventEmitter, Component, ElementRef, Output, ViewChild, AfterViewInit, HostListener, Input, OnInit } from '@angular/core';
 import GridEmitInfo from './gridEmitInfo';
 
 @Component({
@@ -7,18 +7,20 @@ import GridEmitInfo from './gridEmitInfo';
   templateUrl: './grid.component.html',
   styleUrls: ['./grid.component.scss']
 })
-export class GridComponent implements AfterViewInit {
+export class GridComponent implements AfterViewInit, OnInit {
   @ViewChild('canvas', { static: false })
   private canvas?: ElementRef<HTMLCanvasElement>
   @Output() onCellDown = new EventEmitter<GridEmitInfo>;
+  @Input() width = 10
+  @Input() height = 10
+  @Input() resolution = 50
+  @Input() drawGrid = true
+  @Input() gridThickness = 5
   private context: CanvasRenderingContext2D | null = null
   private field: string[][] = []
-  private static readonly resolution = 100
-  private readonly width = 5
-  private readonly height = 5
   private readonly maxZoom = 5
   private readonly minZoom = .05
-  private readonly scrollSensitivity = 0.001
+  private readonly scrollSensitivity = 0.0005
   private isDragging = false;
   private cameraZoom = 1
   private lastZoom = 1
@@ -27,18 +29,23 @@ export class GridComponent implements AfterViewInit {
   private spacePressed = false
   private renderWidth = 500
   private renderHeight = 500
-  private lineThickness = 5
   private zoomTimes = 0
 
-  constructor(){
+  constructor() {
+  }
+  setCellColorByPoint(coordinates: Point, color: string): void {
+    this.setCellColor(coordinates.x, coordinates.y, color)
+  }
+  setCellColor(x: number, y: number, color: string): void {
+    if(x < 0 || x >= this.width || y < 0 || y > this.height) return
+    this.field[x][y] = color
+  }
+  ngOnInit(): void {
     for (let i = 0; i < this.width; i++) {
       this.field.push([]);
       for (let j = 0; j < this.height; j++)
         this.field[i].push('transparent');
     }
-  }
-  setCellColor(coordinates: Point, color: string): void{    
-    this.field[coordinates.x][coordinates.y] = color;
   }
   ngAfterViewInit(): void {
     if (this.canvas === undefined) return
@@ -53,7 +60,7 @@ export class GridComponent implements AfterViewInit {
     this.cameraOffset.y = this.renderHeight / 2;
     this.draw();
   }
-  private updateRenderSize(): void{
+  private updateRenderSize(): void {
     this.renderWidth = innerWidth
     this.renderHeight = innerHeight
   }
@@ -97,11 +104,10 @@ export class GridComponent implements AfterViewInit {
   }
   private adjustZoom(zoomAmount: number, zoomFactor: number): void {
     if (!this.isDragging) {
-      if (zoomAmount)
-      {
+      if (zoomAmount) {
         this.cameraZoom += zoomAmount
         this.zoomTimes = zoomAmount < 0 ? this.zoomTimes - 1 : this.zoomTimes + 1;
-      } 
+      }
       else if (zoomFactor) this.cameraZoom = zoomFactor * this.lastZoom
       this.cameraZoom = Math.min(this.cameraZoom, this.maxZoom)
       this.cameraZoom = Math.max(this.cameraZoom, this.minZoom)
@@ -119,38 +125,40 @@ export class GridComponent implements AfterViewInit {
     this.context!.scale(this.cameraZoom, this.cameraZoom)
     this.context!.translate(-this.renderWidth / 2 + this.cameraOffset.x, -this.renderHeight / 2 + this.cameraOffset.y)
     this.context!.clearRect(0, 0, this.renderWidth, this.renderHeight)
-    let widthEnd = this.width * GridComponent.resolution / 2;
+    let widthEnd = this.width * this.resolution / 2;
     let widthStart = widthEnd * -1;
-    let heightEnd = this.height * GridComponent.resolution / 2;
+    let heightEnd = this.height * this.resolution / 2;
     let heightStart = heightEnd * -1;
     for (let x = 0; x < this.width; x++)
       for (let y = 0; y < this.height; y++) {
         this.context!.fillStyle = this.field[x][y]
-        this.drawRect(widthStart + x * GridComponent.resolution, heightStart + y * GridComponent.resolution, GridComponent.resolution, GridComponent.resolution);
+        this.drawRect(widthStart + x * this.resolution, heightStart + y * this.resolution, this.resolution, this.resolution);
       }
-    this.context!.fillStyle = 'black'
-    for (var x = widthStart; x <= widthEnd; x += GridComponent.resolution)
-      this.drawRect(x, heightStart, this.lineThickness, this.height * GridComponent.resolution)
-    for (var y = heightStart; y <= heightEnd; y += GridComponent.resolution)
-      this.drawRect(widthStart, y, this.width * GridComponent.resolution, this.lineThickness)
-    this.drawRect(widthEnd, heightEnd, this.lineThickness, this.lineThickness)
+    if (this.drawGrid) {
+      this.context!.fillStyle = 'black'
+      for (var x = widthStart; x <= widthEnd; x += this.resolution)
+        this.drawRect(x, heightStart, this.gridThickness, this.height * this.resolution)
+      for (var y = heightStart; y <= heightEnd; y += this.resolution)
+        this.drawRect(widthStart, y, this.width * this.resolution, this.gridThickness)
+      this.drawRect(widthEnd, heightEnd, this.gridThickness, this.gridThickness)
+    }
     requestAnimationFrame(this.draw.bind(this))
   }
   private drawRect(x: number, y: number, width: number, height: number) {
     this.context!.fillRect(x, y, width, height)
   }
-  private emitCellCoordinates(canvasCoordinates: Point, buttonId: number): void { 
+  private emitCellCoordinates(canvasCoordinates: Point, buttonId: number): void {
     const rect = this.canvas!.nativeElement.getBoundingClientRect()
     const offset = new Point(this.cameraOffset.x - this.renderWidth / 2, this.cameraOffset.y - this.renderHeight / 2)
-    const denominator = GridComponent.resolution * this.cameraZoom / 2
+    const denominator = this.resolution * this.cameraZoom / 2
     const multiplierX = this.canvas!.nativeElement.width / this.canvas!.nativeElement.clientWidth / 2
     const multiplierY = this.canvas!.nativeElement.height / this.canvas!.nativeElement.clientHeight / 2
     const clientX = (canvasCoordinates.x - rect.left) * multiplierX
     const clientY = (canvasCoordinates.y - rect.top) * multiplierY
-    const xOffset = -(this.renderWidth / 4) + this.width * GridComponent.resolution / 4 * this.cameraZoom - offset.x * this.cameraZoom / 2
-    const yOffset = -(this.renderHeight / 4) + this.height * GridComponent.resolution / 4 * this.cameraZoom - offset.y * this.cameraZoom / 2
+    const xOffset = -(this.renderWidth / 4) + this.width * this.resolution / 4 * this.cameraZoom - offset.x * this.cameraZoom / 2
+    const yOffset = -(this.renderHeight / 4) + this.height * this.resolution / 4 * this.cameraZoom - offset.y * this.cameraZoom / 2
     const x = Math.floor((clientX + xOffset) / denominator)
     const y = Math.floor((clientY + yOffset) / denominator)
-    this.onCellDown.emit({coordinates: new Point(x, y), buttonId});
+    this.onCellDown.emit({ coordinates: new Point(x, y), buttonId });
   }
 }

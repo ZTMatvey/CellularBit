@@ -1,3 +1,11 @@
-<div class="grid-wrapper">
-    <cb-grid #grid (onCellDown)="onCellDown($event)"></cb-grid>
+<div class="container">
+    <div class="buttons">
+        <cb-image-control-button class="button" (onClick)="handleSpeedControlClick(playStatusType.Stop)" [isActive]="playStatus === playStatusType.Stop" pathToImage="../../../../../assets/svg/stop.svg"></cb-image-control-button>
+        <cb-image-control-button class="button" (onClick)="handleSpeedControlClick(playStatusType.FirstSpeed)" [isActive]="playStatus === playStatusType.FirstSpeed" pathToImage="../../../../../assets/svg/firstSpeed.svg"></cb-image-control-button>
+        <cb-image-control-button class="button" (onClick)="handleSpeedControlClick(playStatusType.SecondSpeed)" [isActive]="playStatus === playStatusType.SecondSpeed" pathToImage="../../../../../assets/svg/secondSpeed.svg"></cb-image-control-button>
+        <cb-image-control-button class="button" (onClick)="handleSpeedControlClick(playStatusType.ThirdSpeed)" [isActive]="playStatus === playStatusType.ThirdSpeed" pathToImage="../../../../../assets/svg/thirdSpeed.svg"></cb-image-control-button>
+    </div>
+    <div class="grid-wrapper">
+        <cb-grid [width]="width" [height]="height" #grid (onCellDown)="onCellDown($event)" [drawGrid]="true"></cb-grid>
+    </div>
 </div>

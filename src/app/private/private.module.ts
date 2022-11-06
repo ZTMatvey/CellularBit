@@ -9,6 +9,7 @@ import { HeaderComponent } from './components/header/header.component';
 import { LogoComponent } from './components/header/logo/logo.component';
 import { GridComponent } from './components/grid/grid.component';
 import { GameOfLifeComponent } from './components/automata/game-of-life/game-of-life.component';
+import { WireworldComponent } from './components/automata/wireworld/wireworld.component';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import { GameOfLifeComponent } from './components/automata/game-of-life/game-of-
     HeaderComponent,
     LogoComponent,
     GridComponent,
-    GameOfLifeComponent
+    GameOfLifeComponent,
+    WireworldComponent
   ],
   imports: [
     CommonModule,
