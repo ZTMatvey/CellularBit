@@ -1,9 +1,11 @@
+import { GameOfLifeComponent } from './components/automata/game-of-life/game-of-life.component';
 import { HomeComponent } from './components/home/home.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
   {path:'home', component: HomeComponent},
+  {path:'gameoflife', component: GameOfLifeComponent},
   {path:'**', redirectTo:'home'}
 ];
 

@@ -1,5 +1,6 @@
-import { AfterContentInit, Component, ElementRef, OnInit, ViewChild, AfterViewInit, HostListener } from '@angular/core';
-import { Point } from 'src/app/core/shared/services/point';
+import { Point } from './../../../core/shared/services/point';
+import { EventEmitter, Component, ElementRef, Output, ViewChild, AfterViewInit, HostListener } from '@angular/core';
+import GridEmitInfo from './gridEmitInfo';
 
 @Component({
   selector: 'cb-grid',
@@ -7,13 +8,14 @@ import { Point } from 'src/app/core/shared/services/point';
   styleUrls: ['./grid.component.scss']
 })
 export class GridComponent implements AfterViewInit {
-
   @ViewChild('canvas', { static: false })
   private canvas?: ElementRef<HTMLCanvasElement>
+  @Output() onCellDown = new EventEmitter<GridEmitInfo>;
   private context: CanvasRenderingContext2D | null = null
-  private static readonly resolution = 50
-  private readonly width = 100 * GridComponent.resolution
-  private readonly height = 100 * GridComponent.resolution
+  private field: string[][] = []
+  private static readonly resolution = 100
+  private readonly width = 5
+  private readonly height = 5
   private readonly maxZoom = 5
   private readonly minZoom = .05
   private readonly scrollSensitivity = 0.001
@@ -25,9 +27,19 @@ export class GridComponent implements AfterViewInit {
   private spacePressed = false
   private renderWidth = 500
   private renderHeight = 500
-  private lineThickness = 2
+  private lineThickness = 5
   private zoomTimes = 0
 
+  constructor(){
+    for (let i = 0; i < this.width; i++) {
+      this.field.push([]);
+      for (let j = 0; j < this.height; j++)
+        this.field[i].push('transparent');
+    }
+  }
+  setCellColor(coordinates: Point, color: string): void{    
+    this.field[coordinates.x][coordinates.y] = color;
+  }
   ngAfterViewInit(): void {
     if (this.canvas === undefined) return
     this.context = this.canvas.nativeElement.getContext('2d')
@@ -41,52 +53,49 @@ export class GridComponent implements AfterViewInit {
     this.cameraOffset.y = this.renderHeight / 2;
     this.draw();
   }
-  updateRenderSize(): void{
+  private updateRenderSize(): void{
     this.renderWidth = innerWidth
     this.renderHeight = innerHeight
   }
-  onWheel(e: WheelEvent): void {
-    if (!this.spacePressed) return
-    this.adjustZoom(e.deltaY * this.scrollSensitivity, 1)
-  }
   @HostListener('window:keydown', ['$event'])
-  onKeyDown(e: KeyboardEvent): void {
+  private onKeyDown(e: KeyboardEvent): void {
     if (e.key === ' ')
       this.spacePressed = true;
   }
   @HostListener('window:keyup', ['$event'])
-  onKeyUp(e: KeyboardEvent): void {
+  private onKeyUp(e: KeyboardEvent): void {
     if (e.key === ' ') {
       this.spacePressed = false;
       this.isDragging = false;
     }
   }
-  onPointerOut(e: MouseEvent): void {
-    this.isDragging = false;
-  }
-  onPointerDown(e: MouseEvent): void {
+  private onPointerDown(e: MouseEvent): void {
     if (this.spacePressed) {
       this.isDragging = true
       this.dragStart.x = e.x / this.cameraZoom - this.cameraOffset.x
       this.dragStart.y = e.y / this.cameraZoom - this.cameraOffset.y
     }
-    else this.getCellCoordinates(new Point(e.x, e.y))
-
+    else this.emitCellCoordinates(new Point(e.x, e.y), e.buttons)
   }
-  onPointerUp(e: MouseEvent): void {
-    this.isDragging = false
-    this.lastZoom = this.cameraZoom
-  }
-  onPointerMove(e: MouseEvent): void {
+  private onPointerMove(e: MouseEvent): void {
     if (this.isDragging) {
       this.cameraOffset.x = e.x / this.cameraZoom - this.dragStart.x
       this.cameraOffset.y = e.y / this.cameraZoom - this.dragStart.y
     }
+    //else this.emitCellCoordinates(new Point(e.x, e.y), e.buttons)
   }
-  handleTouch(e: MouseEvent, singleTouchHandler: (e: MouseEvent) => void): void {
-    singleTouchHandler(e)
+  private onWheel(e: WheelEvent): void {
+    if (!this.spacePressed) return
+    this.adjustZoom(e.deltaY * this.scrollSensitivity, 1)
   }
-  adjustZoom(zoomAmount: number, zoomFactor: number): void {
+  private onPointerOut(e: MouseEvent): void {
+    this.isDragging = false;
+  }
+  private onPointerUp(e: MouseEvent): void {
+    this.isDragging = false
+    this.lastZoom = this.cameraZoom
+  }
+  private adjustZoom(zoomAmount: number, zoomFactor: number): void {
     if (!this.isDragging) {
       if (zoomAmount)
       {
@@ -98,7 +107,7 @@ export class GridComponent implements AfterViewInit {
       this.cameraZoom = Math.max(this.cameraZoom, this.minZoom)
     }
   }
-  draw(): void {
+  private draw(): void {
     if (localStorage.getItem("IsRunning") === 'false') {
       console.log("Обновление остановлено");
       return;
@@ -106,39 +115,43 @@ export class GridComponent implements AfterViewInit {
     this.updateRenderSize();
     this.canvas!.nativeElement.width = this.renderWidth
     this.canvas!.nativeElement.height = this.renderHeight
-
     this.context!.translate(this.renderWidth / 2, this.renderHeight / 2)
     this.context!.scale(this.cameraZoom, this.cameraZoom)
     this.context!.translate(-this.renderWidth / 2 + this.cameraOffset.x, -this.renderHeight / 2 + this.cameraOffset.y)
     this.context!.clearRect(0, 0, this.renderWidth, this.renderHeight)
-    let widthEnd = this.width / 2;
+    let widthEnd = this.width * GridComponent.resolution / 2;
     let widthStart = widthEnd * -1;
-    let heightEnd = this.height / 2;
+    let heightEnd = this.height * GridComponent.resolution / 2;
     let heightStart = heightEnd * -1;
+    for (let x = 0; x < this.width; x++)
+      for (let y = 0; y < this.height; y++) {
+        this.context!.fillStyle = this.field[x][y]
+        this.drawRect(widthStart + x * GridComponent.resolution, heightStart + y * GridComponent.resolution, GridComponent.resolution, GridComponent.resolution);
+      }
+    this.context!.fillStyle = 'black'
     for (var x = widthStart; x <= widthEnd; x += GridComponent.resolution)
-      this.drawRect(x, heightStart, this.lineThickness, this.height)
+      this.drawRect(x, heightStart, this.lineThickness, this.height * GridComponent.resolution)
     for (var y = heightStart; y <= heightEnd; y += GridComponent.resolution)
-      this.drawRect(widthStart, y, this.width, this.lineThickness)
+      this.drawRect(widthStart, y, this.width * GridComponent.resolution, this.lineThickness)
     this.drawRect(widthEnd, heightEnd, this.lineThickness, this.lineThickness)
     requestAnimationFrame(this.draw.bind(this))
   }
-  drawRect(x: number, y: number, width: number, height: number) {
+  private drawRect(x: number, y: number, width: number, height: number) {
     this.context!.fillRect(x, y, width, height)
   }
-  getCellCoordinates(canvasCoordinates: Point): Point { 
+  private emitCellCoordinates(canvasCoordinates: Point, buttonId: number): void { 
     const rect = this.canvas!.nativeElement.getBoundingClientRect()
     const offset = new Point(this.cameraOffset.x - this.renderWidth / 2, this.cameraOffset.y - this.renderHeight / 2)
-    console.log(canvasCoordinates.x - rect.left - this.renderWidth / 4 + this.width / 4 * this.cameraZoom - offset.x * this.cameraZoom / 2)
-    console.log(canvasCoordinates.y - rect.top - this.renderHeight / 4 + this.height / 4 * this.cameraZoom - offset.y * this.cameraZoom / 2)
-    
-    const x = Math.floor((canvasCoordinates.x - rect.left - this.renderWidth / 4 + this.width / 4 
+    const canvasX = (canvasCoordinates.x) * this.canvas!.nativeElement.width / this.canvas!.nativeElement.clientWidth
+    const multiplierX = this.canvas!.nativeElement.width / this.canvas!.nativeElement.clientWidth / 2;
+    const multiplierY = this.canvas!.nativeElement.height / this.canvas!.nativeElement.clientHeight / 2;
+    const denominator = GridComponent.resolution * this.cameraZoom / 2;
+    const x = Math.floor(((canvasCoordinates.x - rect.left) * multiplierX - this.renderWidth / 4 + this.width * GridComponent.resolution / 4 
         * this.cameraZoom - offset.x * this.cameraZoom / 2) 
-      / (GridComponent.resolution * this.cameraZoom / 2))
-    const y = Math.floor((canvasCoordinates.y - rect.top - this.renderHeight / 4 + this.height / 4 
+      / denominator)
+    const y = Math.floor(((canvasCoordinates.y - rect.top) * multiplierY - this.renderHeight / 4 + this.height * GridComponent.resolution / 4 
         * this.cameraZoom - offset.y * this.cameraZoom / 2) 
-      / (GridComponent.resolution * this.cameraZoom / 2))
-    const result = new Point(x, y)
-    console.log(result)
-    return result
+      / denominator)
+    this.onCellDown.emit({coordinates: new Point(x, y), buttonId});
   }
 }

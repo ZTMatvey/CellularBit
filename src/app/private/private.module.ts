@@ -8,6 +8,7 @@ import { HomeComponent } from './components/home/home.component';
 import { HeaderComponent } from './components/header/header.component';
 import { LogoComponent } from './components/header/logo/logo.component';
 import { GridComponent } from './components/grid/grid.component';
+import { GameOfLifeComponent } from './components/automata/game-of-life/game-of-life.component';
 
 @NgModule({
   declarations: [
@@ -15,7 +16,8 @@ import { GridComponent } from './components/grid/grid.component';
     HomeComponent,
     HeaderComponent,
     LogoComponent,
-    GridComponent
+    GridComponent,
+    GameOfLifeComponent
   ],
   imports: [
     CommonModule,
