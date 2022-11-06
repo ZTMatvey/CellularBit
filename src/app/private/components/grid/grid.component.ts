@@ -82,7 +82,7 @@ export class GridComponent implements AfterViewInit {
       this.cameraOffset.x = e.x / this.cameraZoom - this.dragStart.x
       this.cameraOffset.y = e.y / this.cameraZoom - this.dragStart.y
     }
-    //else this.emitCellCoordinates(new Point(e.x, e.y), e.buttons)
+    else this.emitCellCoordinates(new Point(e.x, e.y), e.buttons)
   }
   private onWheel(e: WheelEvent): void {
     if (!this.spacePressed) return
@@ -142,16 +142,15 @@ export class GridComponent implements AfterViewInit {
   private emitCellCoordinates(canvasCoordinates: Point, buttonId: number): void { 
     const rect = this.canvas!.nativeElement.getBoundingClientRect()
     const offset = new Point(this.cameraOffset.x - this.renderWidth / 2, this.cameraOffset.y - this.renderHeight / 2)
-    const canvasX = (canvasCoordinates.x) * this.canvas!.nativeElement.width / this.canvas!.nativeElement.clientWidth
-    const multiplierX = this.canvas!.nativeElement.width / this.canvas!.nativeElement.clientWidth / 2;
-    const multiplierY = this.canvas!.nativeElement.height / this.canvas!.nativeElement.clientHeight / 2;
-    const denominator = GridComponent.resolution * this.cameraZoom / 2;
-    const x = Math.floor(((canvasCoordinates.x - rect.left) * multiplierX - this.renderWidth / 4 + this.width * GridComponent.resolution / 4 
-        * this.cameraZoom - offset.x * this.cameraZoom / 2) 
-      / denominator)
-    const y = Math.floor(((canvasCoordinates.y - rect.top) * multiplierY - this.renderHeight / 4 + this.height * GridComponent.resolution / 4 
-        * this.cameraZoom - offset.y * this.cameraZoom / 2) 
-      / denominator)
+    const denominator = GridComponent.resolution * this.cameraZoom / 2
+    const multiplierX = this.canvas!.nativeElement.width / this.canvas!.nativeElement.clientWidth / 2
+    const multiplierY = this.canvas!.nativeElement.height / this.canvas!.nativeElement.clientHeight / 2
+    const clientX = (canvasCoordinates.x - rect.left) * multiplierX
+    const clientY = (canvasCoordinates.y - rect.top) * multiplierY
+    const xOffset = -(this.renderWidth / 4) + this.width * GridComponent.resolution / 4 * this.cameraZoom - offset.x * this.cameraZoom / 2
+    const yOffset = -(this.renderHeight / 4) + this.height * GridComponent.resolution / 4 * this.cameraZoom - offset.y * this.cameraZoom / 2
+    const x = Math.floor((clientX + xOffset) / denominator)
+    const y = Math.floor((clientY + yOffset) / denominator)
     this.onCellDown.emit({coordinates: new Point(x, y), buttonId});
   }
 }
