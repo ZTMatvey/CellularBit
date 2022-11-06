@@ -10,6 +10,7 @@ import { LogoComponent } from './components/header/logo/logo.component';
 import { GridComponent } from './components/grid/grid.component';
 import { GameOfLifeComponent } from './components/automata/game-of-life/game-of-life.component';
 import { WireworldComponent } from './components/automata/wireworld/wireworld.component';
+import { ToggleModeButtonComponent } from './components/header/toggle-mode-button/toggle-mode-button.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import { WireworldComponent } from './components/automata/wireworld/wireworld.co
     LogoComponent,
     GridComponent,
     GameOfLifeComponent,
-    WireworldComponent
+    WireworldComponent,
+    ToggleModeButtonComponent
   ],
   imports: [
     CommonModule,

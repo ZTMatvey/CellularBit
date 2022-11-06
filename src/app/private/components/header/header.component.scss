@@ -5,9 +5,16 @@
     padding-top: .5rem;
     padding-bottom: .5rem;
 }
-.content-wrapper{
+
+.content-wrapper {
     max-width: 90vw;
     width: 100%;
     margin: 0 auto;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.logo {
     height: 100%;
 }
