@@ -1,72 +1,36 @@
+import { DarkModeService } from './../../../../core/shared/services/dark-mode.service';
 import { GridComponent } from './../../grid/grid.component';
 import { Component, ViewChild, HostListener, OnInit, AfterViewInit } from '@angular/core';
 import { interval, Subscription } from 'rxjs';
 import GridEmitInfo from '../../grid/gridEmitInfo';
 import PlayStatus from '../play-status';
+import AutomataBaseComponent from '../automata-base.component';
+import CellTypes from '../cell-types';
+import CellType from '../cell-type';
+import GameOfLifeCellTypes from './game-of-life-cell-types';
 
 @Component({
   selector: 'cb-game-of-life',
-  templateUrl: './game-of-life.component.html',
-  styleUrls: ['./game-of-life.component.scss']
+  templateUrl: '../automata-base.component.html',
+  styleUrls: ['../automata.scss']
 })
-export class GameOfLifeComponent implements OnInit, AfterViewInit{
-  @ViewChild('grid', {static: false})
-  private grid!: GridComponent;
-  private shiftPressed = false
-  private field: boolean[][] = []
-  private intervalSubscription?: Subscription
-  height = 50
-  width = 50
-  playStatus = PlayStatus.Stop
-  playStatusType = PlayStatus
-  @HostListener('window:keydown', ['$event'])
-  private onKeyDown(e: KeyboardEvent): void {
-    if (e.key === 'Shift')
-      this.shiftPressed = true;
-  }
-  @HostListener('window:keyup', ['$event'])
-  private onKeyUp(e: KeyboardEvent): void {
-    if (e.key === 'Shift')
-      this.shiftPressed = false;
-  }
-  ngOnInit(): void {
-    for (let i = 0; i < this.width; i++) {
-      this.field.push([]);
-      for (let j = 0; j < this.height; j++)
-        this.field[i].push(false);
-    }
-  }
-  ngAfterViewInit(): void {
-    this.updateSpeed()
-  }
-  handleSpeedControlClick(playStatus: PlayStatus): void{
-    this.playStatus = playStatus
-    this.updateSpeed()
-  }
-  updateSpeed(): void{
-    if(this.intervalSubscription)
-    {
-      this.intervalSubscription?.unsubscribe()
-      this.intervalSubscription = undefined
-    }
-    if(this.playStatus === this.playStatusType.Stop) return
-    this.intervalSubscription = interval(this.playStatus).subscribe(this.updateField.bind(this))
-  }
-  private updateField(): void{
-    if(localStorage.getItem("isStopped") === 'true') return
-    this.computeNextGeneration() 
-    for (let i = 0; i < this.width; i++)
-      for (let j = 0; j < this.height; j++)
-        this.updateCell(i, j)
+export class GameOfLifeComponent extends AutomataBaseComponent {
+  constructor(darkModeService: DarkModeService){
+    super(darkModeService)
+    const cellTypes = new CellTypes([
+      new CellType('transparent', 'gray', GameOfLifeCellTypes.Empty), 
+      new CellType('gray', 'black', GameOfLifeCellTypes.Alive)])
+    this.initialize(cellTypes, this.computeNextGeneration)
   }
   private computeNextGeneration() : void{
-    let newField: boolean[][] = [];
+    let newField: CellType[][] = [];
     for (let x = 0; x < this.width; x++) {
       newField.push([])
       for (let y = 0; y < this.height; y++) {
         const neighbours = this.getAmountOfNeighbours(x, y)
-        const isAlive = ((neighbours === 2 || neighbours === 3) && this.field[x][y]) || (neighbours === 3 && !this.field[x][y])
-        newField[x].push(isAlive)
+        const isAlive = ((neighbours === 2 || neighbours === 3) && this.field[x][y].id === GameOfLifeCellTypes.Alive) 
+          || (neighbours === 3 && this.field[x][y].id === GameOfLifeCellTypes.Empty)
+        newField[x].push(isAlive ? this.cellTypes.types[GameOfLifeCellTypes.Alive] : this.cellTypes.types[GameOfLifeCellTypes.Empty])
       }
     }
     this.field = newField
@@ -79,22 +43,8 @@ export class GameOfLifeComponent implements OnInit, AfterViewInit{
         const actualX = x + xn;
         const actualY = y + yn;
         if(actualX < 0 || actualX >= this.width || actualY < 0 || actualY >= this.height) continue
-        if(this.field[actualX][actualY]) result++
+        if(this.field[actualX][actualY].id === GameOfLifeCellTypes.Alive) result++
       }
     return result;
-  }
-  private updateCell(x: number, y: number): void{
-    this.grid.setCellColor(x, y, this.field[x][y] ? 'gray' : 'transparent');
-  }
-  onCellDown(info: GridEmitInfo){
-    if(info.coordinates.x < 0 || 
-      info.coordinates.x >= this.width || 
-      info.coordinates.y < 0 || 
-      info.coordinates.y > this.height) return
-    if(info.buttonId === 1)
-    {
-      this.field[info.coordinates.x][info.coordinates.y] = !this.shiftPressed
-      this.updateCell(info.coordinates.x, info.coordinates.y)
-    }
   }
 }

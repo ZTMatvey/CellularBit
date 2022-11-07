@@ -1,6 +1,8 @@
 <div class="app-wrapper">
     <cb-header></cb-header>
-    <div class="content">
-        <router-outlet></router-outlet>
+    <div [ngClass]="{'dark-mode__content-wrapper': darkModeService.isDarkMode}" class="content-wrapper">
+        <div class="content">
+            <router-outlet></router-outlet>
+        </div>
     </div>
 </div>

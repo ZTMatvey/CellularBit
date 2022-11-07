@@ -1,3 +1,4 @@
+import { DarkModeService } from './../../../core/shared/services/dark-mode.service';
 import { Component, OnInit } from '@angular/core';
 
 @Component({
@@ -6,5 +7,5 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent {
-  
+  constructor(public darkModeService: DarkModeService) { }
 }

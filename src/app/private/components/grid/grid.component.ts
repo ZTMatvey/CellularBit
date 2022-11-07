@@ -1,5 +1,5 @@
 import { Point } from './../../../core/shared/services/point';
-import { EventEmitter, Component, ElementRef, Output, ViewChild, AfterViewInit, HostListener, Input, OnInit } from '@angular/core';
+import { EventEmitter, Component, ElementRef, Output, ViewChild, AfterViewInit, HostListener, Input, OnInit, OnDestroy } from '@angular/core';
 import GridEmitInfo from './gridEmitInfo';
 
 @Component({
@@ -7,7 +7,7 @@ import GridEmitInfo from './gridEmitInfo';
   templateUrl: './grid.component.html',
   styleUrls: ['./grid.component.scss']
 })
-export class GridComponent implements AfterViewInit, OnInit {
+export class GridComponent implements AfterViewInit, OnInit, OnDestroy {
   @ViewChild('canvas', { static: false })
   private canvas?: ElementRef<HTMLCanvasElement>
   @Output() onCellDown = new EventEmitter<GridEmitInfo>;
@@ -16,6 +16,8 @@ export class GridComponent implements AfterViewInit, OnInit {
   @Input() resolution = 50
   @Input() drawGrid = true
   @Input() gridThickness = 5
+  @Input() gridColor = 'black'
+  @Input() backgroundColor = 'transparent'
   private context: CanvasRenderingContext2D | null = null
   private field: string[][] = []
   private readonly maxZoom = 5
@@ -30,14 +32,16 @@ export class GridComponent implements AfterViewInit, OnInit {
   private renderWidth = 500
   private renderHeight = 500
   private zoomTimes = 0
+  private shouldStop = false
 
-  constructor() {
+  ngOnDestroy(): void {
+    this.shouldStop = true
   }
   setCellColorByPoint(coordinates: Point, color: string): void {
     this.setCellColor(coordinates.x, coordinates.y, color)
   }
   setCellColor(x: number, y: number, color: string): void {
-    if(x < 0 || x >= this.width || y < 0 || y > this.height) return
+    if (x < 0 || x >= this.width || y < 0 || y > this.height) return
     this.field[x][y] = color
   }
   ngOnInit(): void {
@@ -118,33 +122,52 @@ export class GridComponent implements AfterViewInit, OnInit {
       console.log("Обновление остановлено");
       return;
     }
-    this.updateRenderSize();
+    if (this.shouldStop) return
+    this.updateRenderSize()
+    this.clearCanvas()
+    if (this.backgroundColor !== 'transparent') {
+      this.context!.fillStyle = this.backgroundColor
+      const width = this.renderWidth / this.cameraZoom
+      const height = this.renderHeight / this.cameraZoom
+      this.fillRect(-width / 2 - (this.cameraOffset.x - this.renderWidth / 2), -height / 2 - (this.cameraOffset.y - this.renderHeight / 2), width, height)
+    }
+    let widthEnd = this.width * this.resolution / 2
+    let widthStart = widthEnd * -1
+    let heightEnd = this.height * this.resolution / 2
+    let heightStart = heightEnd * -1
+    this.drawCells(widthStart, heightStart);
+    if (this.drawGrid) this.createGrid(widthStart, widthEnd, heightStart, heightEnd)
+    requestAnimationFrame(this.draw.bind(this))
+  }
+  private clearCanvas(): void {
     this.canvas!.nativeElement.width = this.renderWidth
     this.canvas!.nativeElement.height = this.renderHeight
     this.context!.translate(this.renderWidth / 2, this.renderHeight / 2)
     this.context!.scale(this.cameraZoom, this.cameraZoom)
     this.context!.translate(-this.renderWidth / 2 + this.cameraOffset.x, -this.renderHeight / 2 + this.cameraOffset.y)
     this.context!.clearRect(0, 0, this.renderWidth, this.renderHeight)
-    let widthEnd = this.width * this.resolution / 2;
-    let widthStart = widthEnd * -1;
-    let heightEnd = this.height * this.resolution / 2;
-    let heightStart = heightEnd * -1;
+  }
+  private drawCells(widthStart: number, heightStart: number): void {
     for (let x = 0; x < this.width; x++)
       for (let y = 0; y < this.height; y++) {
         this.context!.fillStyle = this.field[x][y]
-        this.drawRect(widthStart + x * this.resolution, heightStart + y * this.resolution, this.resolution, this.resolution);
+        this.fillRect(widthStart + x * this.resolution, heightStart + y * this.resolution, this.resolution, this.resolution);
       }
-    if (this.drawGrid) {
-      this.context!.fillStyle = 'black'
-      for (var x = widthStart; x <= widthEnd; x += this.resolution)
-        this.drawRect(x, heightStart, this.gridThickness, this.height * this.resolution)
-      for (var y = heightStart; y <= heightEnd; y += this.resolution)
-        this.drawRect(widthStart, y, this.width * this.resolution, this.gridThickness)
-      this.drawRect(widthEnd, heightEnd, this.gridThickness, this.gridThickness)
-    }
-    requestAnimationFrame(this.draw.bind(this))
+  }
+  private createGrid(widthStart: number, widthEnd: number, heightStart: number, heightEnd: number): void {
+    this.context!.fillStyle = this.gridColor
+    this.context!.beginPath()
+    for (var x = widthStart; x <= widthEnd; x += this.resolution)
+      this.drawRect(x, heightStart, this.gridThickness, this.height * this.resolution)
+    for (var y = heightStart; y <= heightEnd; y += this.resolution)
+      this.drawRect(widthStart, y, this.width * this.resolution, this.gridThickness)
+    this.drawRect(widthEnd, heightEnd, this.gridThickness, this.gridThickness)
+    this.context!.fill();
   }
   private drawRect(x: number, y: number, width: number, height: number) {
+    this.context!.rect(x, y, width, height)
+  }
+  private fillRect(x: number, y: number, width: number, height: number) {
     this.context!.fillRect(x, y, width, height)
   }
   private emitCellCoordinates(canvasCoordinates: Point, buttonId: number): void {

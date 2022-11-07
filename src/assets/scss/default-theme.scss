@@ -2,6 +2,7 @@
     padding: 0;
     margin: 0;
     border: 0;
+    transition: 300ms;
 }
 
 *,
@@ -98,7 +99,4 @@ body {
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
     height: 100%;
-}
-router-outlet{
-    height: 0;
 }

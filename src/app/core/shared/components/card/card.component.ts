@@ -1,3 +1,4 @@
+import { DarkModeService } from './../../services/dark-mode.service';
 import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
@@ -9,4 +10,5 @@ export class CardComponent {
   @Input() text!: string
   @Input() pathToImage!: string
   @Input() link!: string
+  constructor(public darkModeService: DarkModeService) { }
 }

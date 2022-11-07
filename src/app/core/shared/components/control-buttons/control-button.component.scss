@@ -1,10 +1,23 @@
-.child{
+@use '../../../../../assets/scss/partials/colors';
+
+.child {
     border-radius: 50%;
     width: 100%;
     height: 100%;
+    border: solid .1rem colors.$secondary;
+    box-shadow: 0 0 3rem rgba(colors.$secondary, 0.2);
+    &:hover {
+        box-shadow: 0 0 3rem rgba(colors.$secondary, 0.3);
+    }
 }
-
-.wrapper{
+.dark-mode__child {
+    border: solid .1rem colors.$lightPrimary;
+    box-shadow: 0 0 3rem rgba(colors.$lightBg, 0.2);
+    &:hover {
+        box-shadow: 0 0 3rem rgba(colors.$lightBg, 0.3);
+    }
+}
+.wrapper {
     user-select: none;
     min-width: 3rem;
     min-height: 3rem;
@@ -13,12 +26,8 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    &:hover .child{
-        box-shadow: 0 0 3rem rgba(88, 40, 65, 0.3);
-        transition: .1s linear;
-    }
 }
-.active{
+.active {
     height: 2.5rem;
     width: 2.5rem;
 }

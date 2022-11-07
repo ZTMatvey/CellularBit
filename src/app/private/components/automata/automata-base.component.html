@@ -7,13 +7,10 @@
             <cb-image-control-button class="button" (onClick)="handleSpeedControlClick(playStatusType.ThirdSpeed)" [isActive]="playStatus === playStatusType.ThirdSpeed" pathToImage="../../../../../assets/svg/thirdSpeed.svg"></cb-image-control-button>    
         </div>
         <div class="buttons-group">
-            <cb-color-control-button class="button" (onClick)="handleColorControlClick(cellTypesType.Empty)" [isActive]="activeCellType === cellTypesType.Empty" [color]="'gray'"></cb-color-control-button>
-            <cb-color-control-button class="button" (onClick)="handleColorControlClick(cellTypesType.Conductor)" [isActive]="activeCellType === cellTypesType.Conductor" [color]="'yellow'"></cb-color-control-button>
-            <cb-color-control-button class="button" (onClick)="handleColorControlClick(cellTypesType.Head)" [isActive]="activeCellType === cellTypesType.Head"  [color]="'blue'"></cb-color-control-button>
-            <cb-color-control-button class="button" (onClick)="handleColorControlClick(cellTypesType.Tail)" [isActive]="activeCellType === cellTypesType.Tail"  [color]="'red'"></cb-color-control-button>    
+            <cb-color-control-button class="button" *ngFor="let type of cellTypes.types" (onClick)="cellTypes.setActiveTypeById(type.id)" [isActive]="activeCellType === type" [color]="type.displayColor"></cb-color-control-button>
         </div>
     </div>
-    <div class="grid-wrapper">
-        <cb-grid [width]="width" [height]="height" #grid (onCellDown)="onCellDown($event)" [drawGrid]="true"></cb-grid>
+    <div [ngClass]="{'dark-mode__grid-wrapper': darkModeService.isDarkMode}" class="grid-wrapper">
+        <cb-grid [gridColor]="darkModeService.isDarkMode ? 'white' : 'black'" [backgroundColor]="darkModeService.isDarkMode ? 'transparent' : 'transparent'" [width]="width" [height]="height" #grid (onCellDown)="onCellDown($event)" [drawGrid]="true"></cb-grid>
     </div>
 </div>

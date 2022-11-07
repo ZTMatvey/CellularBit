@@ -1,3 +1,3 @@
 <div class="wrapper" (click)="onClickHandler()">
-    <img class="child" [class.active]="isActive" src="{{pathToImage}}" >
+    <img [ngClass]="{'dark-mode__child': darkModeService.isDarkMode}" class="child" [class.active]="isActive" src="{{pathToImage}}" >
 </div>

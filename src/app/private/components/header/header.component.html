@@ -1,4 +1,4 @@
-<header class="header">
+<header [ngClass]="{'dark-mode__header': darkModeService.isDarkMode}" class="header">
     <div class="content-wrapper">
         <cb-logo class="logo"></cb-logo>
         <cb-toggle-mode-button></cb-toggle-mode-button>

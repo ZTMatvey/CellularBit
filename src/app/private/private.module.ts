@@ -11,6 +11,7 @@ import { GridComponent } from './components/grid/grid.component';
 import { GameOfLifeComponent } from './components/automata/game-of-life/game-of-life.component';
 import { WireworldComponent } from './components/automata/wireworld/wireworld.component';
 import { ToggleModeButtonComponent } from './components/header/toggle-mode-button/toggle-mode-button.component';
+import AutomataBaseComponent from './components/automata/automata-base.component';
 
 @NgModule({
   declarations: [

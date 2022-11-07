@@ -1,6 +1,6 @@
 <a routerLink="/" class="wrapper">
     <img src="../../../../../assets/svg/logo.svg" alt="logo" class="logo"/>
-    <div class="text">
+    <div [ngClass]="{'dark-mode__text': darkModeService.isDarkMode}" class="text">
         Cellular bit
     </div>
 </a>

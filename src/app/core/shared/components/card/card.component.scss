@@ -1,7 +1,8 @@
+@use '../../../../../assets/scss/partials/colors';
+
 .container{
     width: 15rem;
     height: 12rem;
-    box-shadow: 0 0 2rem rgba(88, 40, 65, 0.2);
     border-radius: 1rem;
     display: flex;
     flex-direction: column;
@@ -9,16 +10,28 @@
     align-items: center;
     padding: 1rem;
     cursor: pointer;
+    box-shadow: 0 0 2rem rgba(colors.$secondary, 0.2);
     &:hover{
-        box-shadow: 0 0 3rem rgba(88, 40, 65, 0.3);
-        transition: .1s linear;
+        box-shadow: 0 0 3rem rgba(colors.$secondary, 0.3);
     }
+    transition: .1s linear;
+    background-color: colors.$lightBg;
+}
+.dark-mode__container{
+    box-shadow: 0 0 2rem rgba(colors.$lightBg, 0.2);
+    &:hover{
+        box-shadow: 0 0 3rem rgba(colors.$lightBg, 0.3);
+    }
+    background-color: colors.$darkBg;
 }
 .header-text{
     text-transform: uppercase;
     font-size: 1.5rem;
     text-align: center;
     user-select: none;
+}
+.dark-mode__text{
+    color: colors.$lightText;
 }
 .add{
     width: 50%;

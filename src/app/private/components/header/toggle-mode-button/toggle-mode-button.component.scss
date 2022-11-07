@@ -1,52 +1,49 @@
-.mode-toggle__container{
+@use '../../../../../assets/scss/partials/colors';
+
+.wrapper{
     display: flex;
     align-items: center;
     justify-content: center;
 }
-
-.toggle-button__container {
+.container {
     cursor: pointer;
     position: relative;
     margin: 0 .75rem;
 }
-
-.mode-toggle__input {
+.input {
     -webkit-appearance: none;
     -moz-appearance: none;
 }
-
-.mode-toggle__bg {
+.bg {
     height: 1rem;
     width: 2rem;
     border-radius: 0.5rem;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(colors.$darkBg, 0.5);
     display: inline-block;
     transition: background-color 100ms linear;
 }
-
-.mode-toggle__circle {
+.circle {
     height: 1.30rem;
     width: 1.30rem;
-    background-color: #582841;
+    background-color: colors.$secondary;
     position: absolute;
     top: -0.15em;
     border-radius: 50%;
-    box-shadow: 0 0 0 rgba(88, 40, 65, 0.5);
-    transition: left 300ms linear;
+    box-shadow: 0 0 0 rgba(colors.$secondary, 0.5);
     left: -.375rem;
 }
-
-.mode-toggle__circle-checked {
-    background-color: white;
+.circle-checked {
+    background-color: colors.$lightBg;
     left: 1.3rem;
 }
-
-.mode-toggle__bg-checked {
-    background-color: #f99e4c;
+.bg-checked {
+    background-color: colors.$lightPrimary;
 }
-
-.mode-toggle__text {
+.text {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.1rem;
+}
+.dark-mode__text{
+    color: colors.$lightText;
 }

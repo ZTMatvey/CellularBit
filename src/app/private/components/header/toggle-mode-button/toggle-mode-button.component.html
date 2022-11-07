@@ -1,9 +1,9 @@
-<div class="mode-toggle__container">
-    <div class="mode-toggle__text">Light</div>
-    <label class="toggle-button__container">
-        <input (click)="modeToggleSwitch()" type="checkbox" class="mode-toggle__input" />
-        <span [ngClass]="{'mode-toggle__bg-checked': darkModeActive}" class="mode-toggle__bg"></span>
-        <span [ngClass]="{'mode-toggle__circle-checked': darkModeActive}" class="mode-toggle__circle"></span>
+<div class="wrapper">
+    <div [ngClass]="{'dark-mode__text': darkModeService.isDarkMode}" class="text">Light</div>
+    <label class="container">
+        <input #input (click)="modeToggleSwitch()" type="checkbox" class="input" />
+        <span [ngClass]="{'bg-checked': darkModeService.isDarkMode}" class="bg"></span>
+        <span [ngClass]="{'circle-checked': darkModeService.isDarkMode}" class="circle"></span>
     </label>
-    <div class="mode-toggle__text">Dark</div>
+    <div [ngClass]="{'dark-mode__text': darkModeService.isDarkMode}" class="text">Dark</div>
 </div>

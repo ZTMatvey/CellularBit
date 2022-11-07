@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { DarkModeService } from './../../../../core/shared/services/dark-mode.service';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 
 @Component({
   selector: 'cb-toggle-mode-button',
@@ -6,8 +7,10 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./toggle-mode-button.component.scss']
 })
 export class ToggleModeButtonComponent  {
-  darkModeActive = false
+  @ViewChild('input') checkbox!: ElementRef<HTMLInputElement>
+  constructor(public darkModeService: DarkModeService){ }
   modeToggleSwitch(): void {
-    this.darkModeActive = !this.darkModeActive
+    this.darkModeService.toggle()
+    this.checkbox.nativeElement.blur()
   }
 }

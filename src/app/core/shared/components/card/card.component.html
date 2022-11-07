@@ -1,5 +1,5 @@
-<a routerLink="{{link}}" class="container">
-    <div class="header-text">
+<a routerLink="{{link}}" [ngClass]="{'dark-mode__container': darkModeService.isDarkMode}" class="container">
+    <div [ngClass]="{'dark-mode__text': darkModeService.isDarkMode}" class="header-text">
         {{text}}
     </div>
     <div class="add">

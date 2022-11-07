@@ -1,3 +1,4 @@
+import { DarkModeService } from './../../../../core/shared/services/dark-mode.service';
 import { Component, OnInit } from '@angular/core';
 
 @Component({
@@ -5,11 +6,6 @@ import { Component, OnInit } from '@angular/core';
   templateUrl: './logo.component.html',
   styleUrls: ['./logo.component.scss']
 })
-export class LogoComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit(): void {
-  }
-
+export class LogoComponent {
+  constructor(public darkModeService: DarkModeService) { }
 }

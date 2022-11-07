@@ -1,3 +1,4 @@
+import { DarkModeService } from './../../../services/dark-mode.service';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import ControlButtonBase from '../../../services/control-button-base';
 
@@ -8,5 +9,7 @@ import ControlButtonBase from '../../../services/control-button-base';
 })
 export class ImageControlButtonComponent extends ControlButtonBase {
   @Input() pathToImage!: string
-  
+  constructor(public darkModeService: DarkModeService){ 
+    super()
+  }
 }

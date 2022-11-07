@@ -2,8 +2,8 @@ import { Input, Output, EventEmitter, Component } from '@angular/core';
 
 @Component({
     template: ''
-  })
-class ControlButtonBase {
+})
+abstract class ControlButtonBase {
     @Input() isActive!: boolean
     @Output() onClick = new EventEmitter<Event>()
 
